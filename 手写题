@@ -110,3 +110,39 @@ typeOf(new Date)  // 'date'
           this.age = age
       }
     }
+
+3. 数组去重
+
+  3.1 ES5实现
+    function unique(arr) {
+      const res = arr.filter((item, index, array) => {
+        return array.indexOf(item) === index
+      })
+      return res
+    }
+  3.2 ES6实现
+    let unique = arr => [...new Set(arr)]
+    
+4. 数组扁平化
+  
+    4.1  [1, [2, [3]]].flat(2)
+    4.2  ES5实现: 递归
+        function flatten(arr) {
+            var result = [];
+            for (var i = 0, len = arr.length; i < len; i++) {
+                if (Array.isArray(arr[i])) {
+                    result = result.concat(flatten(arr[i]))
+                } else {
+                    result.push(arr[i])
+                }
+            }
+            return result;
+        }
+
+    4.3  ES6实现:
+      function flatten(arr) {
+          while (arr.some(item => Array.isArray(item))) {
+              arr = [].concat(...arr);
+          }
+          return arr;
+      }
