@@ -199,3 +199,79 @@ typeOf(new Date)  // 'date'
         }
     }
 
+ 6. 解析 URL 参数为对象
+    function parseParam(url) {
+      const paramsStr = /.+\?(.+)$/.exec(url)[1]; // 将?后面的字符串取出来
+      const paramsArr = paramsStr.split('&');  // 将字符串以&分割后存到数组种
+      const paramsObj = {}
+      paramsArr.forEach(param => {
+        if (/=/.test(param)) { // 处理有value的参数
+          let [key, value] = param.split('=')
+          value = decodeURIComponent(value) // 解码
+          value = /^\d+$/.test(value) ? parseFloat(value) : value; // 判断是否转为数字
+          
+          // 如果对象有 key，则添加一个值, 没有就创建并设置值
+          if (paramsObj.hasOwnProperty(key)) {
+            paramsObj[key] = [].concat(paramsObj[key], value)
+          } else {
+            paramsObj[key] = value
+          }
+        } else { // 处理没有value的参数
+          paramsObj[param] = true
+        }
+      })
+      return paramsObj
+    }
+    
+   7. 字符串模板
+    function render(template, data) {
+        const reg = /\{\{(\w+)\}\}/; // 模板字符串正则
+        if (reg.test(template)) { // 判断模板里是否有模板字符串
+            const name = reg.exec(template)[1]; // 查找当前模板里第一个模板字符串的字段
+            template = template.replace(reg, data[name]); // 将第一个模板字符串渲染
+            return render(template, data); // 递归的渲染并返回渲染后的结构
+        }
+        return template; // 如果模板没有模板字符串直接返回
+    }
+    
+    测试:
+    let template = '我是{{name}}，年龄{{age}}，性别{{sex}}';
+    let person = {
+        name: '布兰',
+        age: 12
+    }
+    render(template, person); // 我是布兰，年龄12，性别undefined
+
+  8. 图片懒加载
+  
+  额外多了2个精心处理: a. 图片全部加载完成后移除事件监听； b.加载完的图片，从 imgList 移除；
+    let imgList = [...document.querySelectorAll('img')]
+    let length = imgList.length
+
+    const imgLazyLoad = (function() {
+        let count = 0
+
+       return function() {
+            let deleteIndexList = []
+            imgList.forEach((img, index) => {
+                let rect = img.getBoundingClientRect()
+                if (rect.top < window.innerHeight) {
+                    img.src = img.dataset.src
+                    deleteIndexList.push(index)
+                    count++
+                    if (count === length) {
+                        document.removeEventListener('scroll', imgLazyLoad)
+                    }
+                }
+            })
+            imgList = imgList.filter((img, index) => !deleteIndexList.includes(index))
+       }
+    })()
+
+    // 这里最好加上防抖处理
+    document.addEventListener('scroll', imgLazyLoad)
+
+ 9. 节流/防抖
+ 
+ 节流: https://github.com/mqyqingfeng/Blog/issues/26
+ 防抖: https://github.com/mqyqingfeng/Blog/issues/22
